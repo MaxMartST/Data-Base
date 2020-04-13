@@ -122,7 +122,7 @@ FROM [computer]
 	);
 
 --вывести компьютеры офисной комплектации не дороже 16000 условных единиц 
-SELECT [id_computer]
+SELECT [c].id_computer, [c].price
 FROM [computer] AS[c]
 INNER JOIN [equipment] AS [e] ON [e].id_equipment = [c].id_equiment
 LEFT JOIN [type_equipment] AS [t_e] ON [e].id_type = [t_e].id_type
