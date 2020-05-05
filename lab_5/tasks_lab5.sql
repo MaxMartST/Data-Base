@@ -107,4 +107,65 @@ UPDATE [room_in_booking]
 		INNER JOIN [room_category] AS [r_c] ON [r].id_room_category = [r_c].id_room_category
 WHERE [r_i_b].checkin_date = '2019-05-10' AND [h].name = N'Космос' AND [r_c].name = N'Бизнес' 
 
---7. Найти все "пересекающиеся" варианты проживания. Правильное состояние: не может быть забронирован один номер на одну дату несколько раз, т.к. нельзя заселиться нескольким клиентам в один номер. Записи в таблице room_in_booking с id_room_in_booking = 5 и 2154 являются примером неправильного состояния, которые необходимо найти. Результирующий кортеж выборки должен содержать информацию о двух конфликтующих номерах.
+--7. Найти все "пересекающиеся" варианты проживания. Правильное состояние: не может быть забронирован один номер на одну дату несколько раз, 
+--т.к. нельзя заселиться нескольким клиентам в один номер. 
+--Записи в таблице room_in_booking с id_room_in_booking = 5 и 2154 являются примером неправильного состояния, которые необходимо найти. 
+--Результирующий кортеж выборки должен содержать информацию о двух конфликтующих номерах.
+
+SELECT [r_i_b_1].*, [r_i_b_2].*
+	FROM [room_in_booking] AS [r_i_b_1]
+		INNER JOIN [room_in_booking] AS [r_i_b_2] ON [r_i_b_1].id_room = [r_i_b_2].id_room AND [r_i_b_1].id_room_in_booking != [r_i_b_2].id_room_in_booking
+	WHERE [r_i_b_1].checkin_date BETWEEN [r_i_b_2].checkin_date AND [r_i_b_2].checkout_date 
+		OR [r_i_b_1].checkout_date BETWEEN [r_i_b_2].checkin_date AND [r_i_b_2].checkout_date
+;
+
+SELECT [r_i_b_1].*, [r_i_b_2].*
+	FROM [room_in_booking] AS [r_i_b_1]
+		INNER JOIN [room_in_booking] AS [r_i_b_2] ON [r_i_b_1].id_room = [r_i_b_2].id_room AND [r_i_b_1].id_room_in_booking != [r_i_b_2].id_room_in_booking
+	WHERE NOT ([r_i_b_1].checkout_date <= [r_i_b_2].checkin_date OR [r_i_b_1].checkin_date >= [r_i_b_2].checkout_date) 
+;
+
+SELECT [r_i_b_1].*, [r_i_b_2].*
+	FROM [room_in_booking] AS [r_i_b_1]
+		INNER JOIN [room_in_booking] AS [r_i_b_2] ON [r_i_b_1].id_room = [r_i_b_2].id_room AND [r_i_b_1].id_room_in_booking != [r_i_b_2].id_room_in_booking
+	WHERE 
+		([r_i_b_1].checkin_date >= [r_i_b_2].checkin_date AND [r_i_b_1].checkout_date <= [r_i_b_2].checkout_date)  
+		OR ([r_i_b_1].checkin_date < [r_i_b_2].checkin_date AND [r_i_b_1].checkout_date > [r_i_b_2].checkout_date)
+		OR ([r_i_b_1].checkin_date <= [r_i_b_2].checkin_date AND [r_i_b_1].checkout_date <= [r_i_b_2].checkout_date)
+		OR ([r_i_b_1].checkin_date >= [r_i_b_2].checkin_date AND [r_i_b_1].checkout_date >= [r_i_b_2].checkout_date)
+;
+
+--8. Создать бронирование в транзакции.
+USE [lab_5_hotel_complex]
+GO
+
+SET TRANSACTION ISOLATION LEVEL
+    READ COMMITTED
+
+BEGIN TRANSACTION
+
+SET IDENTITY_INSERT [dbo].[booking] ON 
+INSERT [dbo].[booking] ([id_booking], [id_client], [booking_date]) VALUES (5000, 86, CAST(N'2020-05-01' AS Date))
+SET IDENTITY_INSERT [dbo].[booking] OFF 
+
+SET IDENTITY_INSERT [dbo].[client] ON
+INSERT [dbo].[client] ([id_client], [name], [phone]) VALUES (500, N'Иванов Иван Иванович', N'7(7800)111-11-11')
+SET IDENTITY_INSERT [dbo].[client] OFF
+
+SET IDENTITY_INSERT [dbo].[hotel] ON
+INSERT [dbo].[hotel] ([id_hotel], [name], [stars]) VALUES (500, N'Космос', 3)
+SET IDENTITY_INSERT [dbo].[hotel] OFF
+
+SET IDENTITY_INSERT [dbo].[room] ON 
+INSERT [dbo].[room] ([id_room], [id_hotel], [id_room_category], [number], [price]) VALUES (500, 500, 3, N'28', 8504.0000)
+SET IDENTITY_INSERT [dbo].[room] OFF
+
+SET IDENTITY_INSERT [dbo].[room_category] ON 
+INSERT [dbo].[room_category] ([id_room_category], [name], [square]) VALUES (500, N'Бизнес', 30)
+SET IDENTITY_INSERT [dbo].[room_category] OFF
+
+SET IDENTITY_INSERT [dbo].[room_in_booking] ON 
+INSERT [dbo].[room_in_booking] ([id_room_in_booking], [id_booking], [id_room], [checkin_date], [checkout_date]) VALUES (5000, 5000, 209, CAST(N'2020-05-04' AS Date), CAST(N'2020-05-09' AS Date))
+SET IDENTITY_INSERT [dbo].[room_in_booking] OFF
+
+COMMIT
