@@ -36,12 +36,9 @@ SELECT [c].[id_client], [c].name, [c].phone
 
 --3. Дать список свободных номеров всех гостиниц на 22 апреля.
 SELECT [r].number, [h].name
-	FROM [room] AS [r] INNER JOIN [room_in_booking] AS [r_i_b]
-		ON [r].id_room = [r_i_b].id_room 
-		INNER JOIN [booking] AS [b]
-		ON [r_i_b].id_booking = [b].id_booking
-		INNER JOIN [hotel] AS [h]
-		ON [r].id_hotel = [h].id_hotel
+	FROM [room] AS [r] INNER JOIN [room_in_booking] AS [r_i_b] ON [r].id_room = [r_i_b].id_room 
+		INNER JOIN [booking] AS [b] ON [r_i_b].id_booking = [b].id_booking
+		INNER JOIN [hotel] AS [h] ON [r].id_hotel = [h].id_hotel
 	WHERE [r].number NOT IN (
 		SELECT [r].number
 			FROM [room_in_booking] AS [r_i_b] INNER JOIN [room] AS [r]
@@ -62,7 +59,7 @@ SELECT [r_c].id_room_category AS Category, COUNT([r_c].id_room_category) AS Qty_
 				INNER JOIN [room] AS [r] ON [r].id_hotel = [h].id_hotel
 				INNER JOIN [room_in_booking] AS [r_i_b] ON [r].id_room = [r_i_b].id_room
 			WHERE ((MONTH([r_i_b].checkin_date) >= 3 AND MONTH([r_i_b].checkout_date) <=3) AND (DAY([r_i_b].checkin_date) >= 23 AND DAY([r_i_b].checkout_date) > 23) 
-				AND [h].name = 'Космос')
+				AND [h].name = N'Космос')
 	)
 	GROUP BY [r_c].id_room_category
 ;
@@ -115,24 +112,7 @@ WHERE [r_i_b].checkin_date = '2019-05-10' AND [h].name = N'Космос' AND [r_c].nam
 SELECT [r_i_b_1].*, [r_i_b_2].*
 	FROM [room_in_booking] AS [r_i_b_1]
 		INNER JOIN [room_in_booking] AS [r_i_b_2] ON [r_i_b_1].id_room = [r_i_b_2].id_room AND [r_i_b_1].id_room_in_booking != [r_i_b_2].id_room_in_booking
-	WHERE [r_i_b_1].checkin_date BETWEEN [r_i_b_2].checkin_date AND [r_i_b_2].checkout_date 
-		OR [r_i_b_1].checkout_date BETWEEN [r_i_b_2].checkin_date AND [r_i_b_2].checkout_date
-;
-
-SELECT [r_i_b_1].*, [r_i_b_2].*
-	FROM [room_in_booking] AS [r_i_b_1]
-		INNER JOIN [room_in_booking] AS [r_i_b_2] ON [r_i_b_1].id_room = [r_i_b_2].id_room AND [r_i_b_1].id_room_in_booking != [r_i_b_2].id_room_in_booking
-	WHERE NOT ([r_i_b_1].checkout_date <= [r_i_b_2].checkin_date OR [r_i_b_1].checkin_date >= [r_i_b_2].checkout_date) 
-;
-
-SELECT [r_i_b_1].*, [r_i_b_2].*
-	FROM [room_in_booking] AS [r_i_b_1]
-		INNER JOIN [room_in_booking] AS [r_i_b_2] ON [r_i_b_1].id_room = [r_i_b_2].id_room AND [r_i_b_1].id_room_in_booking != [r_i_b_2].id_room_in_booking
-	WHERE 
-		([r_i_b_1].checkin_date >= [r_i_b_2].checkin_date AND [r_i_b_1].checkout_date <= [r_i_b_2].checkout_date)  
-		OR ([r_i_b_1].checkin_date < [r_i_b_2].checkin_date AND [r_i_b_1].checkout_date > [r_i_b_2].checkout_date)
-		OR ([r_i_b_1].checkin_date <= [r_i_b_2].checkin_date AND [r_i_b_1].checkout_date <= [r_i_b_2].checkout_date)
-		OR ([r_i_b_1].checkin_date >= [r_i_b_2].checkin_date AND [r_i_b_1].checkout_date >= [r_i_b_2].checkout_date)
+	WHERE NOT ([r_i_b_1].checkout_date <= [r_i_b_2].checkin_date AND [r_i_b_1].checkin_date < [r_i_b_2].checkin_date)
 ;
 
 --8. Создать бронирование в транзакции.
