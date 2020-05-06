@@ -45,28 +45,32 @@ SELECT [o].id_order, [m].name AS [medicine], [com].name, [o].date
 ;
 
 --4. Дать минимальный и максимальный баллы лекарств каждой фирмы, которая оформила не менее 120 заказов.
-SELECT [c].name, COUNT(*) AS [count order], MIN([p].rating) AS [min rating], MAX([p].rating) AS [max rating]
+SELECT [c].id_company, COUNT(*) AS [count order], MIN([p].rating) AS [min rating], MAX([p].rating) AS [max rating]
 	FROM [order] AS [o]
 		INNER JOIN [production] AS [p] ON [o].id_production = [p].id_production
 		INNER JOIN [company] AS [c] ON [p].id_company = [c].id_company
 		INNER JOIN [medicine] AS [m] ON [p].id_medicine = [m].id_medicine
-	GROUP BY [c].name
+	GROUP BY [c].id_company
+	HAVING COUNT(*) >= 120
+;
+
+SELECT (SELECT name FROM [company] AS [com] WHERE [com].id_company = [c].id_company), 
+COUNT(*) AS [count order], MIN([p].rating) AS [min rating], MAX([p].rating) AS [max rating]
+	FROM [order] AS [o]
+		INNER JOIN [production] AS [p] ON [o].id_production = [p].id_production
+		INNER JOIN [company] AS [c] ON [p].id_company = [c].id_company
+		INNER JOIN [medicine] AS [m] ON [p].id_medicine = [m].id_medicine
+	GROUP BY [c].id_company
 	HAVING COUNT(*) >= 120
 ;
 
 --5. Дать списки сделавших заказы аптек по всем дилерам компании “AstraZeneca”. 
 --Если у дилера нет заказов, в названии аптеки проставить NULL.
-SELECT *
-	FROM [order] AS [o]
-		INNER JOIN [dealer] AS [d] ON [o].id_dealer = [d].id_dealer
-		INNER JOIN (SELECT * FROM [company] AS [c] WHERE [c].name = N'AstraZeneca') [com] ON [d].id_company = [com].id_company
-;
-
 SELECT [p].name, [d].name, [c].name
-	FROM [pharmacy] AS [p]
-		INNER JOIN [order] AS [o] ON [p].id_pharmacy = [o].id_pharmacy
-		INNER JOIN [company] AS [c] ON [c].name = N'AstraZeneca'
-		RIGHT JOIN [dealer] AS [d] ON [d].id_company = [c].id_company
+	FROM [company] AS [c]
+		INNER JOIN [dealer] AS [d] ON [c].id_company = [d].id_company
+		INNER JOIN [order] AS [o] ON [d].id_dealer = [o].id_dealer
+		LEFT JOIN [pharmacy] AS [p] ON [o].id_pharmacy = [p].id_pharmacy AND [c].name = N'AstraZeneca'
 ;
 
 --6. Уменьшить на 20% стоимость всех лекарств, если она превышает 3000, а длительность лечения не более 7 дней.
