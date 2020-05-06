@@ -1,4 +1,4 @@
-﻿USE [lab4_computer_configuration]
+﻿USE [lab_4_computer_configuration]
 GO
 
 --удалить данные всех записей из таблицы computer

@@ -1,4 +1,4 @@
-﻿USE [lab4_computer_configuration]
+﻿USE [lab_4_computer_configuration]
 GO
 --выборка нескольких аргументов из таблицы component_parts
 SELECT [title], [price] 
