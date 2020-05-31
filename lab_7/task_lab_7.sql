@@ -73,14 +73,14 @@ GO
 --4. Дать среднюю оценку студентов по каждому предмету для тех предметов, 
 --по которым занимается не менее 35 студентов.
 
-SELECT (SELECT name FROM [subject] AS [s] WHERE [sub].id_subject = [s].id_subject ) AS [subject], 
-		SUM([m].mark) / COUNT(*) AS [average rating]  
+SELECT (SELECT name FROM [subject] AS [s] WHERE [sub].id_subject = [s].id_subject ) AS [subject],
+		COUNT(DISTINCT [m].id_mark) / COUNT(DISTINCT [st].id_student) AS[average]
 	FROM [lesson] AS [l]
 		INNER JOIN [subject] AS [sub] ON [l].id_subject = [sub].id_subject
 		INNER JOIN [mark] AS [m] ON [l].id_lesson = [m].id_lesson
 		INNER JOIN [student] AS [st] ON [m].id_student = [st].id_student
 	GROUP BY [sub].id_subject
-	HAVING COUNT(*) >= 35
+	HAVING COUNT(DISTINCT [st].id_student) >= 35
 ; 
 
 --5. Дать оценки студентов специальности ВМ по всем проводимым предметам с указанием группы, фамилии, предмета, даты. 
