@@ -70,7 +70,7 @@ IF OBJECT_ID('debtors_in_a_group','P') IS NOT NULL
 	DROP PROC debtors_in_a_group
 GO
 
---4. Дать среднюю оценку студентов по каждому предмету для тех предметов, 
+--4. --ИСПРАВИЛ--	Дать среднюю оценку студентов по каждому предмету для тех предметов, 
 --по которым занимается не менее 35 студентов.
 
 SELECT (SELECT name FROM [subject] AS [s] WHERE [sub].id_subject = [s].id_subject ) AS [subject],
