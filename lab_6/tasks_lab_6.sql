@@ -1,5 +1,6 @@
 ﻿USE [lab_6_pharmacy]
 GO
+--добавил
 
 --1. Добавить внешние ключи.
 --dealer.id_company => company.id_company
@@ -45,15 +46,6 @@ SELECT [o].id_order, [m].name AS [medicine], [com].name, [o].date
 ;
 
 --4. Дать минимальный и максимальный баллы лекарств каждой фирмы, которая оформила не менее 120 заказов.
-SELECT [c].id_company, COUNT(*) AS [count order], MIN([p].rating) AS [min rating], MAX([p].rating) AS [max rating]
-	FROM [order] AS [o]
-		INNER JOIN [production] AS [p] ON [o].id_production = [p].id_production
-		INNER JOIN [company] AS [c] ON [p].id_company = [c].id_company
-		INNER JOIN [medicine] AS [m] ON [p].id_medicine = [m].id_medicine
-	GROUP BY [c].id_company
-	HAVING COUNT(*) >= 120
-;
-
 SELECT (SELECT name FROM [company] AS [com] WHERE [com].id_company = [c].id_company), 
 COUNT(*) AS [count order], MIN([p].rating) AS [min rating], MAX([p].rating) AS [max rating]
 	FROM [order] AS [o]
