@@ -70,11 +70,11 @@ IF OBJECT_ID('debtors_in_a_group','P') IS NOT NULL
 	DROP PROC debtors_in_a_group
 GO
 
---4. --ИСПРАВИЛ--	Дать среднюю оценку студентов по каждому предмету для тех предметов, 
+--4. Дать среднюю оценку студентов по каждому предмету для тех предметов, 
 --по которым занимается не менее 35 студентов.
 
 SELECT (SELECT name FROM [subject] AS [s] WHERE [sub].id_subject = [s].id_subject ) AS [subject],
-		COUNT(DISTINCT [m].id_mark) / COUNT(DISTINCT [st].id_student) AS[average]
+		SUM([m].mark) / COUNT([m].mark) AS[average]
 	FROM [lesson] AS [l]
 		INNER JOIN [subject] AS [sub] ON [l].id_subject = [sub].id_subject
 		INNER JOIN [mark] AS [m] ON [l].id_lesson = [m].id_lesson
