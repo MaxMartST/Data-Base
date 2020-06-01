@@ -32,7 +32,6 @@ SELECT [c].[id_client], [c].name, [c].phone
 		INNER JOIN [hotel] AS [h] 
 		ON [r].id_hotel = [h].id_hotel
 	WHERE [h].name = 'Космос' AND [r_c].name = 'Люкс' AND [r_i_b].checkin_date <= '2019-04-01' AND '2019-04-01' <= [r_i_b].checkout_date;
---какой вариант верней и правильны ли они вообще?
 
 --3. Дать список свободных номеров всех гостиниц на 22 апреля.
 SELECT [r].number, [h].name
@@ -48,33 +47,19 @@ SELECT [r].number, [h].name
 ;
 
 --4. Дать количество проживающих в гостинице “Космос” на 23 марта по каждой категории номеров
-SELECT [r_c].id_room_category AS Category, COUNT([r_c].id_room_category) AS Qty_category 
+SELECT [r_c].id_room_category AS [Category], COUNT([r_c].id_room_category) AS [tenants]
 	FROM [room_category] AS [r_c] 
 		INNER JOIN [room] AS [r] ON [r_c].id_room_category = [r].id_room_category
-		INNER JOIN [hotel] AS [h] ON [h].id_hotel = [r].id_hotel
+		INNER JOIN (SELECT * FROM [hotel] AS [h] WHERE [h].name = N'Космос') [h] ON [h].id_hotel = [r].id_hotel
 		INNER JOIN [room_in_booking] AS [r_i_b] ON [r].id_room = [r_i_b].id_room
 	WHERE [h].name IN (
 		SELECT [h].name
 			FROM [hotel] 
 				INNER JOIN [room] AS [r] ON [r].id_hotel = [h].id_hotel
 				INNER JOIN [room_in_booking] AS [r_i_b] ON [r].id_room = [r_i_b].id_room
-			WHERE ((MONTH([r_i_b].checkin_date) >= 3 AND MONTH([r_i_b].checkout_date) <=3) AND (DAY([r_i_b].checkin_date) >= 23 AND DAY([r_i_b].checkout_date) > 23) 
-				AND [h].name = N'Космос')
+					AND [r_i_b].checkin_date < '2019-03-23'
+					AND [r_i_b].checkout_date > '2019-03-23'
 	)
-	GROUP BY [r_c].id_room_category
-;
-
-SELECT [r_c].id_room_category AS Category, COUNT([r_c].id_room_category) AS Qty_category,
-	(SELECT name FROM room_category WHERE id_room_category = [r_c].id_room_category)
-	FROM [room_category] AS [r_c]
-		INNER JOIN [room] AS [r] ON [r_c].id_room_category = [r].id_room_category
-		INNER JOIN [room_in_booking] AS [r_i_b] ON [r].id_room = [r_i_b].id_room
-	WHERE [r_i_b].id_room IN (
-		SELECT id_room 
-			FROM hotel AS [h]
-				INNER JOIN [room] AS [r] ON [h].id_hotel = [r].id_hotel
-			WHERE [h].name = N'Космос'
-	) AND [r_i_b].checkin_date >= '2019-03-23' AND [r_i_b].checkout_date < '2019-03-23'
 	GROUP BY [r_c].id_room_category
 ;
 
