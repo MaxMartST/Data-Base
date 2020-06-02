@@ -27,8 +27,15 @@ ALTER TABLE [order]
 ALTER TABLE [order]
 	ADD CONSTRAINT FK_order_pharmacy FOREIGN KEY(id_pharmacy) REFERENCES [pharmacy](id_pharmacy);
 
+--Статистика
+SET STATISTICS IO ON
+
 --2. Выдать информацию по всем заказам лекарства “Кордерон” компании “Аргус” с указанием названий аптек, дат, объема заказов.
-SELECT [o].[id_order], [med].name AS [medicine], [com].name AS [company], [phar].name AS [pharmacy], [o].date AS [date], [o].quantity AS [quantity]
+SELECT [o].[id_order], [med].name AS [medicine], 
+		[com].name AS [company], 
+		[phar].name AS [pharmacy], 
+		[o].date AS [date], 
+		[o].quantity AS [quantity]
 	FROM [order] AS [o]
 		INNER JOIN [production] AS [p] ON [o].id_production = [p].id_production
 		INNER JOIN (SELECT * FROM [medicine] AS [m] WHERE [m].name = N'Кордерон') [med] ON [p].id_medicine = [med].id_medicine
@@ -36,13 +43,29 @@ SELECT [o].[id_order], [med].name AS [medicine], [com].name AS [company], [phar]
 		INNER JOIN [pharmacy] AS [phar] ON [o].id_pharmacy = [phar].id_pharmacy
 ;
 
+DROP INDEX IX_production_id_production ON [dbo].[production]
+CREATE NONCLUSTERED INDEX IX_production_id_production ON [dbo].[production]
+(
+	[id_production] ASC
+)
+
+SELECT * FROM [company] AS [c] WHERE [c].name = N'Аргус';
+
+DROP INDEX IX_company_name ON [dbo].[company]
+CREATE NONCLUSTERED INDEX IX_company_name ON [dbo].[company]
+(
+	[name] ASC
+) INCLUDE([id_company])
+
 --3. Дать список лекарств компании “Фарма”, на которые не были сделаны заказы до 25 января.
-SELECT (SELECT name FROM [medicine] AS [med] WHERE [m].id_medicine = [med].id_medicine)
-	FROM [order] AS [o]
-		INNER JOIN [production] AS [p] ON [o].id_production = [p].id_production AND ([o].date >= '2019-01-25')
-		INNER JOIN (SELECT * FROM [company] AS [c] WHERE [c].name = N'Фарма') [com] ON [p].id_company = [com].id_company
+SELECT [m].name AS [medicine]
+	FROM [production] AS [p]
+		INNER JOIN (SELECT * FROM [company] AS [c] WHERE [c].name = N'Фарма') [c] ON [p].id_company = [c].id_company
 		INNER JOIN [medicine] AS [m] ON [p].id_medicine = [m].id_medicine
-	GROUP BY [m].id_medicine
+		LEFT JOIN (SELECT [o].id_production AS [id_production], MIN([o].date) 
+					AS [date] FROM [order] AS [o] GROUP BY [o].id_production) [o] ON [p].id_production = [o].id_production
+	WHERE [o].date >= '2019-01-25' OR [o].date IS NULL
+	ORDER BY [p].id_production ASC;
 ;
 
 --4. Дать минимальный и максимальный баллы лекарств каждой фирмы, которая оформила не менее 120 заказов.
