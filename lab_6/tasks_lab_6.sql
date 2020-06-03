@@ -31,31 +31,14 @@ ALTER TABLE [order]
 SET STATISTICS IO ON
 
 --2. Выдать информацию по всем заказам лекарства “Кордерон” компании “Аргус” с указанием названий аптек, дат, объема заказов.
-SELECT [o].[id_order], [med].name AS [medicine], 
-		[com].name AS [company], 
-		[phar].name AS [pharmacy], 
-		[o].date AS [date], 
-		[o].quantity AS [quantity]
+SELECT [o].[id_order], [m].name AS [medicine], [c].name AS [company], 
+		[phar].name AS [pharmacy], [o].date AS [date], [o].quantity AS [quantity]
 	FROM [order] AS [o]
 		INNER JOIN [production] AS [p] ON [o].id_production = [p].id_production
-		INNER JOIN (SELECT * FROM [medicine] AS [m] WHERE [m].name = N'Кордерон') [med] ON [p].id_medicine = [med].id_medicine
-		INNER JOIN (SELECT * FROM [company] AS [c] WHERE [c].name = N'Аргус') [com] ON [p].id_company = [com].id_company
+		INNER JOIN (SELECT * FROM [medicine] AS [m] WHERE [m].name = N'Кордерон') [m] ON [p].id_medicine = [m].id_medicine
+		INNER JOIN (SELECT * FROM [company] AS [c] WHERE [c].name = N'Аргус') [c] ON [p].id_company = [c].id_company
 		INNER JOIN [pharmacy] AS [phar] ON [o].id_pharmacy = [phar].id_pharmacy
 ;
-
-DROP INDEX IX_production_id_production ON [dbo].[production]
-CREATE NONCLUSTERED INDEX IX_production_id_production ON [dbo].[production]
-(
-	[id_production] ASC
-)
-
-SELECT * FROM [company] AS [c] WHERE [c].name = N'Аргус';
-
-DROP INDEX IX_company_name ON [dbo].[company]
-CREATE NONCLUSTERED INDEX IX_company_name ON [dbo].[company]
-(
-	[name] ASC
-) INCLUDE([id_company])
 
 --3. Дать список лекарств компании “Фарма”, на которые не были сделаны заказы до 25 января.
 SELECT [m].name AS [medicine]
@@ -97,3 +80,68 @@ UPDATE [production]
 		INNER JOIN [medicine] AS [m] ON [p].id_medicine = [m].id_medicine
 	WHERE [p].price > 3000 AND [m].cure_duration <= 7
 ;
+
+--7. Добавить необходимые индексы.
+--индекс medicine по name
+CREATE NONCLUSTERED INDEX [IX_medicine_name] ON [dbo].[medicine]
+(
+	[name] ASC
+)
+--удаление
+DROP INDEX [IX_medicine_name] ON [dbo].[medicine]
+
+--индекс company по name
+CREATE NONCLUSTERED INDEX [IX_company_name] ON [dbo].[company]
+(
+	[name] ASC
+)
+--удаление
+DROP INDEX [IX_company_name] ON [dbo].[company]
+
+--индекс order по id_pharmacy
+CREATE NONCLUSTERED INDEX [IX_order_id_pharmacy] ON [dbo].[order]
+(
+	[id_pharmacy] ASC
+)
+--удаление
+DROP INDEX [IX_order_id_pharmacy] ON [dbo].[order]
+
+--индекс order по id_production
+CREATE NONCLUSTERED INDEX [IX_order_id_production] ON [dbo].[order]
+(
+	[id_production] ASC
+)
+--удаление
+DROP INDEX [IX_order_id_production] ON [dbo].[order]
+
+--индекс order по date
+CREATE NONCLUSTERED INDEX [IX_order_date] ON [dbo].[order]
+(
+	[date] ASC
+)
+--удаление
+DROP INDEX [IX_order_date] ON [dbo].[order]
+
+--индекс production по id_medicine
+CREATE NONCLUSTERED INDEX [IX_production_id_medicine] ON [dbo].[production]
+(
+	[id_medicine] ASC
+)
+--удаление
+DROP INDEX [IX_production_id_medicine] ON [dbo].[production]
+
+--индекс production по id_production
+CREATE NONCLUSTERED INDEX [IX_production_id_production] ON [dbo].[production]
+(
+	[id_production] ASC
+)
+--удаление
+DROP INDEX [IX_production_id_production] ON [dbo].[production]
+
+--индекс order по price
+CREATE NONCLUSTERED INDEX [IX_production_price] ON [dbo].[production]
+(
+	[price] ASC
+)
+--удаление
+DROP INDEX [IX_production_price] ON [dbo].[production]
