@@ -18,20 +18,15 @@ ALTER TABLE [room]
   ADD FOREIGN KEY (id_room_category) REFERENCES [room_category] (id_room_category);
 
 --2. Выдать информацию о клиентах гостиницы “Космос”, проживающих в номерах категории “Люкс” на 1 апреля 2019г.
---		здесь соединение таблиц начинается с room_in_booking до client
-
+--здесь соединение таблиц начинается с room_in_booking до client
 SELECT [c].[id_client], [c].name, [c].phone
-	FROM [client] AS [c] INNER JOIN [booking] AS [b] 
-		ON [c].id_client = [b].id_client
-		INNER JOIN [room_in_booking] AS [r_i_b] 
-		ON [b].id_booking = [r_i_b].id_booking
-		INNER JOIN [room] AS [r] 
-		ON [r_i_b].id_room = [r].id_room
-		INNER JOIN [room_category] AS [r_c] 
-		ON [r].id_room_category = [r_c].id_room_category
-		INNER JOIN [hotel] AS [h] 
-		ON [r].id_hotel = [h].id_hotel
-	WHERE [h].name = 'Космос' AND [r_c].name = 'Люкс' AND [r_i_b].checkin_date <= '2019-04-01' AND '2019-04-01' <= [r_i_b].checkout_date;
+	FROM [client] AS [c] INNER JOIN [booking] AS [b] ON [c].id_client = [b].id_client
+		INNER JOIN [room_in_booking] AS [r_i_b] ON [b].id_booking = [r_i_b].id_booking
+		INNER JOIN [room] AS [r] ON [r_i_b].id_room = [r].id_room
+		INNER JOIN [room_category] AS [r_c] ON [r].id_room_category = [r_c].id_room_category
+		INNER JOIN [hotel] AS [h] ON [r].id_hotel = [h].id_hotel
+	WHERE [h].name = 'Космос' AND [r_c].name = 'Люкс' AND [r_i_b].checkin_date <= '2019-04-01' AND '2019-04-01' <= [r_i_b].checkout_date
+;
 
 --3. Дать список свободных номеров всех гостиниц на 22 апреля.
 SELECT [r].number, [h].name
@@ -134,3 +129,77 @@ INSERT [dbo].[room_in_booking] ([id_room_in_booking], [id_booking], [id_room], [
 SET IDENTITY_INSERT [dbo].[room_in_booking] OFF
 
 COMMIT
+
+--9. Добавить необходимые индексы для всех таблиц.
+--индекс room_in_booking по id_booking
+CREATE NONCLUSTERED INDEX [IX_room_in_booking_id_booking] ON [dbo].[room_in_booking]
+(
+	[id_booking] ASC
+)
+--удаление
+DROP INDEX [IX_room_in_booking_id_booking] ON [dbo].[room_in_booking]
+
+--индекс room_in_booking по id_room
+CREATE NONCLUSTERED INDEX [IX_room_in_booking_id_room] ON [dbo].[room_in_booking]
+(
+	[id_room] ASC
+)
+--удаление
+DROP INDEX [IX_room_in_booking_id_room] ON [dbo].[room_in_booking]
+
+--индекс room_in_booking по checkin_date
+CREATE NONCLUSTERED INDEX [IX_room_in_booking_checkin_date] ON [dbo].[room_in_booking]
+(
+	[checkin_date] ASC
+)
+--удаление
+DROP INDEX [IX_room_in_booking_checkin_date] ON [dbo].[room_in_booking]
+
+--индекс room_in_booking по checkin_date и checkout_date
+CREATE NONCLUSTERED INDEX [IX_room_in_booking_checkin_date_checkout_date] ON [dbo].[room_in_booking]
+(
+	[checkin_date] ASC,
+	[checkout_date] ASC
+)
+--удаление
+DROP INDEX [IX_room_in_booking_checkin_date_checkout_date] ON [dbo].[room_in_booking]
+
+--индекс room_category по name
+CREATE NONCLUSTERED INDEX [IX_room_category_name] ON [dbo].[room_category]
+(
+	[name] ASC
+)
+--удаление
+DROP INDEX [IX_room_category_name] ON [dbo].[room_category]
+
+--индекс room по id_room_category
+CREATE NONCLUSTERED INDEX [IX_room_id_room_category] ON [dbo].[room]
+(
+	[id_room_category] ASC
+)
+--удаление
+DROP INDEX [IX_room_id_room_category] ON [dbo].[room]
+
+--индекс room по id_hotel
+CREATE NONCLUSTERED INDEX [IX_room_id_hotel] ON [dbo].[room]
+(
+	[id_hotel] ASC
+)
+--удаление
+DROP INDEX [IX_room_id_hotel] ON [dbo].[room]
+
+--индекс hotel по name
+CREATE NONCLUSTERED INDEX [IX_hotel_name] ON [dbo].[hotel]
+(
+	[name] ASC
+)
+--удаление
+DROP INDEX [IX_hotel_name] ON [dbo].[hotel]
+
+--индекс booking по booking_date
+CREATE NONCLUSTERED INDEX [IX_booking_booking_date] ON [dbo].[booking]
+(
+	[booking_date] ASC
+)
+--удаление
+DROP INDEX [IX_booking_booking_date] ON [dbo].[booking]
