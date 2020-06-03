@@ -70,6 +70,20 @@ IF OBJECT_ID('debtors_in_a_group','P') IS NOT NULL
 	DROP PROC debtors_in_a_group
 GO
 
+SELECT *
+	FROM [group] AS [g]
+	INNER JOIN [student] AS [st] ON [g].id_group = [st].id_group
+	LEFT JOIN [mark] AS [m] ON [st].id_student = [m].id_student
+	--RIGHT JOIN [lesson] AS [les] ON [m].id_lesson = [les].id_lesson
+WHERE [m].mark IS NULL
+;
+
+SELECT [sub].name , COUNT([les].id_lesson)
+	FROM [lesson] AS [les]
+		RIGHT JOIN [subject] AS [sub] ON [les].id_subject = [sub].id_subject
+	GROUP BY [sub].name 
+;
+
 --4. Дать среднюю оценку студентов по каждому предмету для тех предметов, 
 --по которым занимается не менее 35 студентов.
 
@@ -119,3 +133,85 @@ ROLLBACK
 
 DROP VIEW increase_score
 GO 
+
+--7. Добавить необходимые индексы.
+--индекс subject по name
+CREATE NONCLUSTERED INDEX [IX_subject_name] ON [dbo].[subject]
+(
+	[name] ASC
+)
+--удаление
+DROP INDEX [IX_subject_name] ON [dbo].[subject]
+
+--индекс lesson по id_subject
+CREATE NONCLUSTERED INDEX [IX_lesson_id_subject] ON [dbo].[lesson]
+(
+	[id_subject] ASC
+)
+--удаление
+DROP INDEX [IX_lesson_id_subject] ON [dbo].[lesson]
+
+--индекс lesson по id_group
+CREATE NONCLUSTERED INDEX [IX_lesson_id_group] ON [dbo].[lesson]
+(
+	[id_group] ASC
+)
+--удаление
+DROP INDEX [IX_lesson_id_group] ON [dbo].[lesson]
+
+--индекс lesson по date
+CREATE NONCLUSTERED INDEX [IX_lesson_date] ON [dbo].[lesson]
+(
+	[date] ASC
+)
+--удаление
+DROP INDEX [IX_lesson_date] ON [dbo].[lesson]
+
+--индекс mark по id_student и id_lesson
+CREATE NONCLUSTERED INDEX [IX_mark_id_student_id_lesson] ON [dbo].[mark]
+(
+	[id_student] ASC,
+	[id_lesson] ASC
+)
+--удаление
+DROP INDEX [IX_mark_id_student_id_lesson] ON [dbo].[mark]
+
+--индекс mark по id_lesson
+CREATE NONCLUSTERED INDEX [IX_mark_id_lesson] ON [dbo].[mark]
+(
+	[id_lesson] ASC
+)
+--удаление
+DROP INDEX [IX_mark_id_lesson] ON [dbo].[mark]
+
+--индекс mark по id_student
+CREATE NONCLUSTERED INDEX [IX_mark_id_student] ON [dbo].[mark]
+(
+	[id_student] ASC
+)
+--удаление
+DROP INDEX [IX_mark_id_student] ON [dbo].[mark]
+
+--индекс mark по mark
+CREATE NONCLUSTERED INDEX [IX_mark_mark] ON [dbo].[mark]
+(
+	[mark] ASC
+)
+--удаление
+DROP INDEX [IX_mark_mark] ON [dbo].[mark]
+
+--индекс student по id_group 
+CREATE NONCLUSTERED INDEX [IX_student_id_group] ON [dbo].[student]
+(
+	[id_group] ASC
+)
+--удаление
+DROP INDEX [IX_student_id_group] ON [dbo].[student]
+
+--индекс group по name
+CREATE NONCLUSTERED INDEX [IX_group_name] ON [dbo].[group]
+(
+	[name] ASC
+)
+--удаление
+DROP INDEX [IX_group_name] ON [dbo].[group]
