@@ -91,8 +91,9 @@ SELECT (SELECT name FROM [subject] AS [s] WHERE [sub].id_subject = [s].id_subjec
 		SUM([m].mark) / COUNT([m].mark) AS[average]
 	FROM [lesson] AS [l]
 		INNER JOIN [subject] AS [sub] ON [l].id_subject = [sub].id_subject
-		INNER JOIN [mark] AS [m] ON [l].id_lesson = [m].id_lesson
-		INNER JOIN [student] AS [st] ON [m].id_student = [st].id_student
+		INNER JOIN [group] AS [g] ON [l].id_group = [g].id_group
+		INNER JOIN [student] AS [st] ON [g].id_group = [st].id_group
+		LEFT JOIN [mark] AS [m] ON [st].id_student = [m].id_student
 	GROUP BY [sub].id_subject
 	HAVING COUNT(DISTINCT [st].id_student) >= 35
 ; 
