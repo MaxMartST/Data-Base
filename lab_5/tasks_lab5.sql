@@ -1,6 +1,6 @@
-USE [lab_5_hotel_complex]
+п»їUSE [lab_5_hotel_complex]
 GO
--- 1. Добавить внешние ключи.
+-- 1. Р”РѕР±Р°РІРёС‚СЊ РІРЅРµС€РЅРёРµ РєР»СЋС‡Рё.
 ALTER TABLE [booking]
   ADD FOREIGN KEY (id_client) REFERENCES [client] (id_client);
 
@@ -17,18 +17,18 @@ ALTER TABLE [room]
 ALTER TABLE [room]
   ADD FOREIGN KEY (id_room_category) REFERENCES [room_category] (id_room_category);
 
---2. Выдать информацию о клиентах гостиницы “Космос”, проживающих в номерах категории “Люкс” на 1 апреля 2019г.
---здесь соединение таблиц начинается с room_in_booking до client
+--2. Р’С‹РґР°С‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РєР»РёРµРЅС‚Р°С… РіРѕСЃС‚РёРЅРёС†С‹ вЂњРљРѕСЃРјРѕСЃвЂќ, РїСЂРѕР¶РёРІР°СЋС‰РёС… РІ РЅРѕРјРµСЂР°С… РєР°С‚РµРіРѕСЂРёРё вЂњР›СЋРєСЃвЂќ РЅР° 1 Р°РїСЂРµР»СЏ 2019Рі.
+--Р·РґРµСЃСЊ СЃРѕРµРґРёРЅРµРЅРёРµ С‚Р°Р±Р»РёС† РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃ room_in_booking РґРѕ client
 SELECT [c].[id_client], [c].name, [c].phone
 	FROM [client] AS [c] INNER JOIN [booking] AS [b] ON [c].id_client = [b].id_client
 		INNER JOIN [room_in_booking] AS [r_i_b] ON [b].id_booking = [r_i_b].id_booking
 		INNER JOIN [room] AS [r] ON [r_i_b].id_room = [r].id_room
 		INNER JOIN [room_category] AS [r_c] ON [r].id_room_category = [r_c].id_room_category
 		INNER JOIN [hotel] AS [h] ON [r].id_hotel = [h].id_hotel
-	WHERE [h].name = 'Космос' AND [r_c].name = 'Люкс' AND [r_i_b].checkin_date <= '2019-04-01' AND '2019-04-01' <= [r_i_b].checkout_date
+	WHERE [h].name = 'РљРѕСЃРјРѕСЃ' AND [r_c].name = 'Р›СЋРєСЃ' AND [r_i_b].checkin_date <= '2019-04-01' AND '2019-04-01' <= [r_i_b].checkout_date
 ;
 
---3. Дать список свободных номеров всех гостиниц на 22 апреля.
+--3. Р”Р°С‚СЊ СЃРїРёСЃРѕРє СЃРІРѕР±РѕРґРЅС‹С… РЅРѕРјРµСЂРѕРІ РІСЃРµС… РіРѕСЃС‚РёРЅРёС† РЅР° 22 Р°РїСЂРµР»СЏ.
 SELECT [r].number, [h].name
 	FROM [room] AS [r] INNER JOIN [room_in_booking] AS [r_i_b] ON [r].id_room = [r_i_b].id_room 
 		INNER JOIN [booking] AS [b] ON [r_i_b].id_booking = [b].id_booking
@@ -41,24 +41,17 @@ SELECT [r].number, [h].name
 	)
 ;
 
---4. Дать количество проживающих в гостинице “Космос” на 23 марта по каждой категории номеров
+--4. Р”Р°С‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕР¶РёРІР°СЋС‰РёС… РІ РіРѕСЃС‚РёРЅРёС†Рµ вЂњРљРѕСЃРјРѕСЃвЂќ РЅР° 23 РјР°СЂС‚Р° РїРѕ РєР°Р¶РґРѕР№ РєР°С‚РµРіРѕСЂРёРё РЅРѕРјРµСЂРѕРІ
 SELECT [r_c].id_room_category AS [Category], COUNT([r_c].id_room_category) AS [tenants]
 	FROM [room_category] AS [r_c] 
 		INNER JOIN [room] AS [r] ON [r_c].id_room_category = [r].id_room_category
-		INNER JOIN (SELECT * FROM [hotel] AS [h] WHERE [h].name = N'Космос') [h] ON [h].id_hotel = [r].id_hotel
-		INNER JOIN [room_in_booking] AS [r_i_b] ON [r].id_room = [r_i_b].id_room
-	WHERE [h].name IN (
-		SELECT [h].name
-			FROM [hotel] 
-				INNER JOIN [room] AS [r] ON [r].id_hotel = [h].id_hotel
-				INNER JOIN [room_in_booking] AS [r_i_b] ON [r].id_room = [r_i_b].id_room
-					AND [r_i_b].checkin_date < '2019-03-23'
-					AND [r_i_b].checkout_date > '2019-03-23'
-	)
+		INNER JOIN (SELECT * FROM [hotel] AS [h] WHERE [h].name = N'РљРѕСЃРјРѕСЃ') [h] ON [h].id_hotel = [r].id_hotel
+		INNER JOIN [room_in_booking] AS [r_i_b] ON [r].id_room = [r_i_b].id_room 
+	WHERE [r_i_b].checkin_date < '2019-03-23' AND [r_i_b].checkout_date > '2019-03-23'
 	GROUP BY [r_c].id_room_category
 ;
 
---5. Дать список последних проживавших клиентов по всем комнатам гостиницы “Космос”, выехавшим в апреле с указанием даты выезда.
+--5. Р”Р°С‚СЊ СЃРїРёСЃРѕРє РїРѕСЃР»РµРґРЅРёС… РїСЂРѕР¶РёРІР°РІС€РёС… РєР»РёРµРЅС‚РѕРІ РїРѕ РІСЃРµРј РєРѕРјРЅР°С‚Р°Рј РіРѕСЃС‚РёРЅРёС†С‹ вЂњРљРѕСЃРјРѕСЃвЂќ, РІС‹РµС…Р°РІС€РёРј РІ Р°РїСЂРµР»Рµ СЃ СѓРєР°Р·Р°РЅРёРµРј РґР°С‚С‹ РІС‹РµР·РґР°.
 SELECT [c].name AS Name_client, [r_i_b].checkout_date AS Checkout_date
 	FROM [client] AS [c] 
 		INNER JOIN [booking] AS [b] ON [c].id_client = [b].id_client
@@ -68,12 +61,12 @@ SELECT [c].name AS Name_client, [r_i_b].checkout_date AS Checkout_date
 				FROM room_in_booking AS [r_i_b]
 				INNER JOIN [room] AS [r] ON [r_i_b].id_room = [r].id_room
 				INNER JOIN [hotel] AS [h] ON [r].id_hotel = [h].id_hotel
-			WHERE [r_i_b].checkout_date BETWEEN '2019-04-01' AND '2019-04-30' AND [h].name = N'Космос'
+			WHERE [r_i_b].checkout_date BETWEEN '2019-04-01' AND '2019-04-30' AND [h].name = N'РљРѕСЃРјРѕСЃ'
 			GROUP BY [r].id_room
 		) last_checkout (id_room, checkout_date) ON [r_i_b].id_room = last_checkout.id_room AND [r_i_b].checkout_date = last_checkout.checkout_date
 ;
 
---6. Продлить на 2 дня дату проживания в гостинице “Космос” всем клиентам комнат категории “Бизнес”, которые заселились 10 мая.
+--6. РџСЂРѕРґР»РёС‚СЊ РЅР° 2 РґРЅСЏ РґР°С‚Сѓ РїСЂРѕР¶РёРІР°РЅРёСЏ РІ РіРѕСЃС‚РёРЅРёС†Рµ вЂњРљРѕСЃРјРѕСЃвЂќ РІСЃРµРј РєР»РёРµРЅС‚Р°Рј РєРѕРјРЅР°С‚ РєР°С‚РµРіРѕСЂРёРё вЂњР‘РёР·РЅРµСЃвЂќ, РєРѕС‚РѕСЂС‹Рµ Р·Р°СЃРµР»РёР»РёСЃСЊ 10 РјР°СЏ.
 
 UPDATE [room_in_booking]
 	SET
@@ -82,20 +75,23 @@ UPDATE [room_in_booking]
 		INNER JOIN [room] AS [r] ON [r_i_b].id_room = [r].id_room
 		INNER JOIN [hotel] AS [h] ON [r].id_hotel = [h].id_hotel
 		INNER JOIN [room_category] AS [r_c] ON [r].id_room_category = [r_c].id_room_category
-WHERE [r_i_b].checkin_date = '2019-05-10' AND [h].name = N'Космос' AND [r_c].name = N'Бизнес' 
+WHERE [r_i_b].checkin_date = '2019-05-10' AND [h].name = N'РљРѕСЃРјРѕСЃ' AND [r_c].name = N'Р‘РёР·РЅРµСЃ' 
 
---7. Найти все "пересекающиеся" варианты проживания. Правильное состояние: не может быть забронирован один номер на одну дату несколько раз, 
---т.к. нельзя заселиться нескольким клиентам в один номер. 
---Записи в таблице room_in_booking с id_room_in_booking = 5 и 2154 являются примером неправильного состояния, которые необходимо найти. 
---Результирующий кортеж выборки должен содержать информацию о двух конфликтующих номерах.
+--7. РќР°Р№С‚Рё РІСЃРµ "РїРµСЂРµСЃРµРєР°СЋС‰РёРµСЃСЏ" РІР°СЂРёР°РЅС‚С‹ РїСЂРѕР¶РёРІР°РЅРёСЏ. РџСЂР°РІРёР»СЊРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ: РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ Р·Р°Р±СЂРѕРЅРёСЂРѕРІР°РЅ РѕРґРёРЅ РЅРѕРјРµСЂ РЅР° РѕРґРЅСѓ РґР°С‚Сѓ РЅРµСЃРєРѕР»СЊРєРѕ СЂР°Р·, 
+--С‚.Рє. РЅРµР»СЊР·СЏ Р·Р°СЃРµР»РёС‚СЊСЃСЏ РЅРµСЃРєРѕР»СЊРєРёРј РєР»РёРµРЅС‚Р°Рј РІ РѕРґРёРЅ РЅРѕРјРµСЂ. 
+--Р—Р°РїРёСЃРё РІ С‚Р°Р±Р»РёС†Рµ room_in_booking СЃ id_room_in_booking = 5 Рё 2154 СЏРІР»СЏСЋС‚СЃСЏ РїСЂРёРјРµСЂРѕРј РЅРµРїСЂР°РІРёР»СЊРЅРѕРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ, РєРѕС‚РѕСЂС‹Рµ РЅРµРѕР±С…РѕРґРёРјРѕ РЅР°Р№С‚Рё. 
+--Р РµР·СѓР»СЊС‚РёСЂСѓСЋС‰РёР№ РєРѕСЂС‚РµР¶ РІС‹Р±РѕСЂРєРё РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РґРІСѓС… РєРѕРЅС„Р»РёРєС‚СѓСЋС‰РёС… РЅРѕРјРµСЂР°С….
 
 SELECT [r_i_b_1].*, [r_i_b_2].*
 	FROM [room_in_booking] AS [r_i_b_1]
-		INNER JOIN [room_in_booking] AS [r_i_b_2] ON [r_i_b_1].id_room = [r_i_b_2].id_room AND [r_i_b_1].id_room_in_booking != [r_i_b_2].id_room_in_booking
-	WHERE NOT ([r_i_b_1].checkout_date <= [r_i_b_2].checkin_date AND [r_i_b_1].checkin_date < [r_i_b_2].checkin_date)
+		INNER JOIN [room_in_booking] AS [r_i_b_2] ON [r_i_b_1].id_room = [r_i_b_2].id_room 
+			AND [r_i_b_1].id_room_in_booking != [r_i_b_2].id_room_in_booking
+	WHERE ([r_i_b_2].checkin_date BETWEEN [r_i_b_1].checkin_date AND [r_i_b_1].checkout_date) 
+		AND [r_i_b_2].checkin_date != [r_i_b_1].checkout_date
+	ORDER BY [r_i_b_1].id_room_in_booking
 ;
 
---8. Создать бронирование в транзакции.
+--8. РЎРѕР·РґР°С‚СЊ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ РІ С‚СЂР°РЅР·Р°РєС†РёРё.
 USE [lab_5_hotel_complex]
 GO
 
@@ -109,11 +105,11 @@ INSERT [dbo].[booking] ([id_booking], [id_client], [booking_date]) VALUES (5000,
 SET IDENTITY_INSERT [dbo].[booking] OFF 
 
 SET IDENTITY_INSERT [dbo].[client] ON
-INSERT [dbo].[client] ([id_client], [name], [phone]) VALUES (500, N'Иванов Иван Иванович', N'7(7800)111-11-11')
+INSERT [dbo].[client] ([id_client], [name], [phone]) VALUES (500, N'РРІР°РЅРѕРІ РРІР°РЅ РРІР°РЅРѕРІРёС‡', N'7(7800)111-11-11')
 SET IDENTITY_INSERT [dbo].[client] OFF
 
 SET IDENTITY_INSERT [dbo].[hotel] ON
-INSERT [dbo].[hotel] ([id_hotel], [name], [stars]) VALUES (500, N'Космос', 3)
+INSERT [dbo].[hotel] ([id_hotel], [name], [stars]) VALUES (500, N'РљРѕСЃРјРѕСЃ', 3)
 SET IDENTITY_INSERT [dbo].[hotel] OFF
 
 SET IDENTITY_INSERT [dbo].[room] ON 
@@ -121,7 +117,7 @@ INSERT [dbo].[room] ([id_room], [id_hotel], [id_room_category], [number], [price
 SET IDENTITY_INSERT [dbo].[room] OFF
 
 SET IDENTITY_INSERT [dbo].[room_category] ON 
-INSERT [dbo].[room_category] ([id_room_category], [name], [square]) VALUES (500, N'Бизнес', 30)
+INSERT [dbo].[room_category] ([id_room_category], [name], [square]) VALUES (500, N'Р‘РёР·РЅРµСЃ', 30)
 SET IDENTITY_INSERT [dbo].[room_category] OFF
 
 SET IDENTITY_INSERT [dbo].[room_in_booking] ON 
@@ -130,76 +126,76 @@ SET IDENTITY_INSERT [dbo].[room_in_booking] OFF
 
 COMMIT
 
---9. Добавить необходимые индексы для всех таблиц.
---индекс room_in_booking по id_booking
+--9. Р”РѕР±Р°РІРёС‚СЊ РЅРµРѕР±С…РѕРґРёРјС‹Рµ РёРЅРґРµРєСЃС‹ РґР»СЏ РІСЃРµС… С‚Р°Р±Р»РёС†.
+--РёРЅРґРµРєСЃ room_in_booking РїРѕ id_booking
 CREATE NONCLUSTERED INDEX [IX_room_in_booking_id_booking] ON [dbo].[room_in_booking]
 (
 	[id_booking] ASC
 )
---удаление
+--СѓРґР°Р»РµРЅРёРµ
 DROP INDEX [IX_room_in_booking_id_booking] ON [dbo].[room_in_booking]
 
---индекс room_in_booking по id_room
+--РёРЅРґРµРєСЃ room_in_booking РїРѕ id_room
 CREATE NONCLUSTERED INDEX [IX_room_in_booking_id_room] ON [dbo].[room_in_booking]
 (
 	[id_room] ASC
 )
---удаление
+--СѓРґР°Р»РµРЅРёРµ
 DROP INDEX [IX_room_in_booking_id_room] ON [dbo].[room_in_booking]
 
---индекс room_in_booking по checkin_date
+--РёРЅРґРµРєСЃ room_in_booking РїРѕ checkin_date
 CREATE NONCLUSTERED INDEX [IX_room_in_booking_checkin_date] ON [dbo].[room_in_booking]
 (
 	[checkin_date] ASC
 )
---удаление
+--СѓРґР°Р»РµРЅРёРµ
 DROP INDEX [IX_room_in_booking_checkin_date] ON [dbo].[room_in_booking]
 
---индекс room_in_booking по checkin_date и checkout_date
+--РёРЅРґРµРєСЃ room_in_booking РїРѕ checkin_date Рё checkout_date
 CREATE NONCLUSTERED INDEX [IX_room_in_booking_checkin_date_checkout_date] ON [dbo].[room_in_booking]
 (
 	[checkin_date] ASC,
 	[checkout_date] ASC
 )
---удаление
+--СѓРґР°Р»РµРЅРёРµ
 DROP INDEX [IX_room_in_booking_checkin_date_checkout_date] ON [dbo].[room_in_booking]
 
---индекс room_category по name
+--РёРЅРґРµРєСЃ room_category РїРѕ name
 CREATE NONCLUSTERED INDEX [IX_room_category_name] ON [dbo].[room_category]
 (
 	[name] ASC
 )
---удаление
+--СѓРґР°Р»РµРЅРёРµ
 DROP INDEX [IX_room_category_name] ON [dbo].[room_category]
 
---индекс room по id_room_category
+--РёРЅРґРµРєСЃ room РїРѕ id_room_category
 CREATE NONCLUSTERED INDEX [IX_room_id_room_category] ON [dbo].[room]
 (
 	[id_room_category] ASC
 )
---удаление
+--СѓРґР°Р»РµРЅРёРµ
 DROP INDEX [IX_room_id_room_category] ON [dbo].[room]
 
---индекс room по id_hotel
+--РёРЅРґРµРєСЃ room РїРѕ id_hotel
 CREATE NONCLUSTERED INDEX [IX_room_id_hotel] ON [dbo].[room]
 (
 	[id_hotel] ASC
 )
---удаление
+--СѓРґР°Р»РµРЅРёРµ
 DROP INDEX [IX_room_id_hotel] ON [dbo].[room]
 
---индекс hotel по name
+--РёРЅРґРµРєСЃ hotel РїРѕ name
 CREATE NONCLUSTERED INDEX [IX_hotel_name] ON [dbo].[hotel]
 (
 	[name] ASC
 )
---удаление
+--СѓРґР°Р»РµРЅРёРµ
 DROP INDEX [IX_hotel_name] ON [dbo].[hotel]
 
---индекс booking по booking_date
+--РёРЅРґРµРєСЃ booking РїРѕ booking_date
 CREATE NONCLUSTERED INDEX [IX_booking_booking_date] ON [dbo].[booking]
 (
 	[booking_date] ASC
 )
---удаление
+--СѓРґР°Р»РµРЅРёРµ
 DROP INDEX [IX_booking_booking_date] ON [dbo].[booking]
